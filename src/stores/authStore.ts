@@ -15,7 +15,8 @@ interface AuthState {
   logout: () => void;
   clearError: () => void;
   setUser: (user: User | null) => void;
-  checkAuthStatus: () => void;
+  checkAuthStatus: () => Promise<void>;
+  initializeAuth: () => Promise<void>;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -88,9 +89,34 @@ export const useAuthStore = create<AuthState>()(
         });
       },
 
-      checkAuthStatus: () => {
-        const isAuthenticated = apiClient.isAuthenticated();
-        set({ isAuthenticated });
+      checkAuthStatus: async () => {
+        if (!apiClient.isAuthenticated()) {
+          set({ isAuthenticated: false, user: null });
+          return;
+        }
+
+        try {
+          set({ isLoading: true });
+          const response = await apiClient.getCurrentUser();
+          set({ 
+            user: response.user, 
+            isAuthenticated: true,
+            isLoading: false,
+            error: null
+          });
+        } catch (error: any) {
+          // Token is invalid or expired
+          set({ 
+            user: null, 
+            isAuthenticated: false,
+            isLoading: false,
+            error: null
+          });
+        }
+      },
+
+      initializeAuth: async () => {
+        await get().checkAuthStatus();
       },
     }),
     {

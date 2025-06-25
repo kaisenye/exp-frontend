@@ -3,7 +3,8 @@ import type {
   LoginCredentials, 
   LoginResponse, 
   RegisterData, 
-  APIError 
+  APIError,
+  User
 } from '../types';
 
 class APIClient {
@@ -97,13 +98,13 @@ class APIClient {
 
   // Authentication methods
   async login(credentials: LoginCredentials): Promise<LoginResponse> {
-    const response = await this.post<LoginResponse>('/auth/sessions', credentials);
+    const response = await this.post<LoginResponse>('/auth/login', credentials);
     this.setToken(response.token);
     return response;
   }
 
   async register(userData: RegisterData): Promise<LoginResponse> {
-    const response = await this.post<LoginResponse>('/auth/registrations', { user: userData });
+    const response = await this.post<LoginResponse>('/auth/register', { user: userData });
     this.setToken(response.token);
     return response;
   }
@@ -119,6 +120,11 @@ class APIClient {
   // Check if user is authenticated
   isAuthenticated(): boolean {
     return !!this.token;
+  }
+
+  // Get current user (validates token and returns user data)
+  async getCurrentUser(): Promise<{ user: User }> {
+    return this.get<{ user: User }>('/auth/me');
   }
 }
 

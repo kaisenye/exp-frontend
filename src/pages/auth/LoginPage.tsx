@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, Navigate } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
@@ -14,8 +14,13 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoading, error } = useAuthStore();
+  const { login, isLoading, error, isAuthenticated } = useAuthStore();
   const { addNotification } = useUIStore();
+
+  // Redirect if already authenticated
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const {
     register,

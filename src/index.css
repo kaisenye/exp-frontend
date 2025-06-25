@@ -33,6 +33,15 @@ body {
   color: theme(colors.neutral.900);
 }
 
+p {
+  margin: 0;
+}
+
+h1 {
+  margin: 0;
+}
+
+
 /* Typography utilities */
 .text-h1 {
   font-size: 1.875rem;
