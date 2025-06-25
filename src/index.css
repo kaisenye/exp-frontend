@@ -1,0 +1,108 @@
+@import "tailwindcss/theme" layer(theme);
+@import "tailwindcss/utilities" layer(utilities);
+
+@theme {
+  --color-neutral-50: #fafafa;
+  --color-neutral-100: #f5f5f5;
+  --color-neutral-200: #e5e5e5;
+  --color-neutral-300: #d4d4d4;
+  --color-neutral-400: #a3a3a3;
+  --color-neutral-500: #737373;
+  --color-neutral-600: #525252;
+  --color-neutral-700: #404040;
+  --color-neutral-800: #262626;
+  --color-neutral-900: #171717;
+  --color-neutral-950: #0a0a0a;
+
+  --color-red-50: #fef2f2;
+  --color-red-200: #fecaca;
+  --color-red-600: #dc2626;
+  --color-red-700: #b91c1c;
+
+  --font-family-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Base styles */
+* {
+  border-color: theme(colors.neutral.200);
+}
+
+body {
+  font-family: theme(font.family.sans);
+  background-color: theme(colors.neutral.50);
+  color: theme(colors.neutral.900);
+}
+
+/* Typography utilities */
+.text-h1 {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+.text-h2 {
+  font-size: 1.5rem;
+  line-height: 2rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.text-h3 {
+  font-size: 1.25rem;
+  line-height: 1.75rem;
+  font-weight: 600;
+}
+
+.text-h4 {
+  font-size: 1.125rem;
+  line-height: 1.75rem;
+  font-weight: 500;
+}
+
+/* Form elements */
+.input-field {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid theme(colors.neutral.300);
+  border-radius: 0.5rem;
+  background-color: white;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.input-field:focus {
+  border-color: theme(colors.neutral.500);
+  box-shadow: 0 0 0 3px rgb(115 115 115 / 0.1);
+}
+
+.input-field::placeholder {
+  color: theme(colors.neutral.400);
+}
+
+.input-field:disabled {
+  background-color: theme(colors.neutral.100);
+  color: theme(colors.neutral.500);
+  cursor: not-allowed;
+}
+
+/* Card utilities */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid theme(colors.neutral.200);
+  box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+}
+
+.card-elevated {
+  background-color: white;
+  border-radius: 0.5rem;
+  border: 1px solid theme(colors.neutral.100);
+  box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -2px rgb(0 0 0 / 0.05);
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
