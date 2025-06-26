@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { useAuthStore } from './stores/authStore';
@@ -26,6 +26,7 @@ const queryClient = new QueryClient({
 // Protected Route component
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated, isLoading } = useAuthStore();
+  const location = useLocation();
   
   if (isLoading) {
     return (
@@ -38,17 +39,19 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
     );
   }
   
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  return isAuthenticated ? <>{children}</> : <Navigate to="/login" state={{ from: location }} replace />;
 }
 
-function App() {
-  const { initializeAuth, isAuthenticated, isLoading } = useAuthStore();
-
-  useEffect(() => {
-    initializeAuth();
-  }, [initializeAuth]);
-
-  // Show loading spinner while checking authentication
+// Loading wrapper to prevent routing decisions during auth initialization
+function LoadingAwareRoute({ 
+  children, 
+  fallback 
+}: { 
+  children: React.ReactNode; 
+  fallback: React.ReactNode;
+}) {
+  const { isLoading } = useAuthStore();
+  
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -59,15 +62,33 @@ function App() {
       </div>
     );
   }
+  
+  return <>{children}</>;
+}
+
+function App() {
+  const { initializeAuth, isAuthenticated, isLoading } = useAuthStore();
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <Router>
         <div className="min-h-screen bg-gray-50">
           <Routes>
-            {/* Public routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            {/* Public routes - only redirect if not loading */}
+            <Route path="/login" element={
+              <LoadingAwareRoute fallback={<div>Loading...</div>}>
+                {isAuthenticated ? <Navigate to="/dashboard" replace /> : <LoginPage />}
+              </LoadingAwareRoute>
+            } />
+            <Route path="/register" element={
+              <LoadingAwareRoute fallback={<div>Loading...</div>}>
+                {isAuthenticated ? <Navigate to="/dashboard" replace /> : <RegisterPage />}
+              </LoadingAwareRoute>
+            } />
             
             {/* Protected routes */}
             <Route
@@ -111,10 +132,24 @@ function App() {
               }
             />
             
-            {/* Redirect root to dashboard */}
+            {/* Root redirect - only redirect when not loading */}
             <Route
               path="/"
-              element={<Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />}
+              element={
+                <LoadingAwareRoute fallback={<div>Loading...</div>}>
+                  <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+                </LoadingAwareRoute>
+              }
+            />
+            
+            {/* Catch all route for 404s - only redirect when not loading */}
+            <Route
+              path="*"
+              element={
+                <LoadingAwareRoute fallback={<div>Loading...</div>}>
+                  <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />
+                </LoadingAwareRoute>
+              }
             />
           </Routes>
           

@@ -33,7 +33,8 @@ export class PlaidService {
    */
   async syncAccounts(): Promise<void> {
     try {
-      await apiClient.post('/plaid/sync_all_accounts');
+      // Fixed: Changed from '/plaid/sync_all_accounts' to '/plaid/sync_all'
+      await apiClient.post('/plaid/sync_all');
     } catch (error: any) {
       throw new Error(error.message || 'Failed to sync accounts');
     }
@@ -52,10 +53,14 @@ export class PlaidService {
 
   /**
    * Remove Plaid connection for an account
+   * Note: This endpoint doesn't exist in the backend yet
    */
   async disconnectAccount(accountId: number): Promise<void> {
     try {
-      await apiClient.delete(`/plaid/accounts/${accountId}`);
+      // This route doesn't exist in the backend - you may need to implement it
+      // or handle account disconnection differently
+      throw new Error('Disconnect functionality not yet implemented in backend');
+      // await apiClient.delete(`/plaid/accounts/${accountId}`);
     } catch (error: any) {
       throw new Error(error.message || 'Failed to disconnect account');
     }

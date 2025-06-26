@@ -23,7 +23,7 @@ export default function AccountsPage() {
         </div>
 
         {/* Accounts List */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <AccountsList />
         </div>
 

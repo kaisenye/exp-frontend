@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { useNavigate, Link, Navigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
@@ -14,8 +14,12 @@ const loginSchema = z.object({
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading, error, isAuthenticated } = useAuthStore();
   const { addNotification } = useUIStore();
+
+  // Get the intended destination from location state, or default to dashboard
+  const from = (location.state as any)?.from?.pathname || '/dashboard';
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -38,7 +42,8 @@ export default function LoginPage() {
         title: 'Welcome back!',
         message: 'You have been successfully logged in.',
       });
-      navigate('/dashboard');
+      // Navigate to the intended destination or dashboard
+      navigate(from, { replace: true });
     } catch (error) {
       addNotification({
         type: 'error',

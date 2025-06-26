@@ -24,7 +24,7 @@ export const useAuthStore = create<AuthState>()(
     (set, get) => ({
       user: null,
       isAuthenticated: false,
-      isLoading: false,
+      isLoading: true,
       error: null,
 
       login: async (credentials: LoginCredentials) => {
@@ -74,7 +74,8 @@ export const useAuthStore = create<AuthState>()(
         set({ 
           user: null, 
           isAuthenticated: false, 
-          error: null 
+          error: null,
+          isLoading: false
         });
       },
 
@@ -85,18 +86,18 @@ export const useAuthStore = create<AuthState>()(
       setUser: (user: User | null) => {
         set({ 
           user, 
-          isAuthenticated: !!user 
+          isAuthenticated: !!user,
+          isLoading: false
         });
       },
 
       checkAuthStatus: async () => {
         if (!apiClient.isAuthenticated()) {
-          set({ isAuthenticated: false, user: null });
+          set({ isAuthenticated: false, user: null, isLoading: false });
           return;
         }
 
         try {
-          set({ isLoading: true });
           const response = await apiClient.getCurrentUser();
           set({ 
             user: response.user, 
@@ -116,6 +117,7 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initializeAuth: async () => {
+        set({ isLoading: true });
         await get().checkAuthStatus();
       },
     }),

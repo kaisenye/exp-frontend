@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { useNavigate, Link, Navigate } from 'react-router-dom';
+import { useNavigate, Link, Navigate, useLocation } from 'react-router-dom';
 import { Button } from '../../components/ui/Button';
 import { useAuthStore } from '../../stores/authStore';
 import { useUIStore } from '../../stores/uiStore';
@@ -12,7 +12,7 @@ const registerSchema = z.object({
   last_name: z.string().min(1, 'Last name is required'),
   email: z.string().email('Please enter a valid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
-  password_confirmation: z.string().min(6, 'Please confirm your password'),
+  password_confirmation: z.string()
 }).refine((data) => data.password === data.password_confirmation, {
   message: "Passwords don't match",
   path: ["password_confirmation"],
@@ -20,8 +20,12 @@ const registerSchema = z.object({
 
 export default function RegisterPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register: registerUser, isLoading, error, isAuthenticated } = useAuthStore();
   const { addNotification } = useUIStore();
+
+  // Get the intended destination from location state, or default to dashboard
+  const from = (location.state as any)?.from?.pathname || '/dashboard';
 
   // Redirect if already authenticated
   if (isAuthenticated) {
@@ -44,7 +48,8 @@ export default function RegisterPage() {
         title: 'Account created!',
         message: 'Your account has been created successfully.',
       });
-      navigate('/dashboard');
+      // Navigate to the intended destination or dashboard
+      navigate(from, { replace: true });
     } catch (error) {
       addNotification({
         type: 'error',
