@@ -1,6 +1,124 @@
+import { useState } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/Layout';
+import { categoryService } from '../../services/categories';
+import { transactionService } from '../../services/transactions';
+import type { Category } from '../../types';
 
 export default function CategoriesPage() {
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<Category | null>(null);
+  const queryClient = useQueryClient();
+
+  // Fetch categories
+  const { data: categoriesData, isLoading: categoriesLoading } = useQuery({
+    queryKey: ['categories'],
+    queryFn: () => categoryService.getCategories(),
+    staleTime: 60 * 60 * 1000, // 1 hour
+  });
+
+  // Fetch spending data for each category (current month)
+  const { data: spendingData } = useQuery({
+    queryKey: ['category-spending'],
+    queryFn: async () => {
+      const currentMonth = new Date();
+      const startDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), 1).toISOString().split('T')[0];
+      const endDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 0).toISOString().split('T')[0];
+      
+      const transactions = await transactionService.getTransactions({
+        start_date: startDate,
+        end_date: endDate,
+        type: 'expenses',
+        per_page: 1000
+      });
+      
+      // Group spending by category
+      const categorySpending: Record<number, number> = {};
+      transactions.transactions.forEach(transaction => {
+        if (transaction.primary_category) {
+          const categoryId = transaction.primary_category.id;
+          categorySpending[categoryId] = (categorySpending[categoryId] || 0) + Math.abs(transaction.amount);
+        }
+      });
+      
+      return categorySpending;
+    },
+    enabled: !!categoriesData,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Create category mutation
+  const createCategoryMutation = useMutation({
+    mutationFn: (categoryData: {
+      name: string;
+      color: string;
+      description?: string;
+      budget_limit?: number;
+      parent_category_id?: number;
+    }) => categoryService.createCategory(categoryData),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setShowCreateForm(false);
+    },
+  });
+
+  // Update category mutation
+  const updateCategoryMutation = useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<Category> }) => 
+      categoryService.updateCategory(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+      setEditingCategory(null);
+    },
+  });
+
+  // Delete category mutation
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: number) => categoryService.deleteCategory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['categories'] });
+    },
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD'
+    }).format(amount);
+  };
+
+  const calculateBudgetProgress = (spent: number, budget: number) => {
+    if (!budget) return 0;
+    return Math.min((spent / budget) * 100, 100);
+  };
+
+  const getBudgetStatus = (spent: number, budget: number) => {
+    if (!budget) return 'no-budget';
+    const percentage = (spent / budget) * 100;
+    if (percentage >= 100) return 'over-budget';
+    if (percentage >= 80) return 'warning';
+    return 'on-track';
+  };
+
+  const handleCreateCategory = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    
+    createCategoryMutation.mutate({
+      name: formData.get('name') as string,
+      color: formData.get('color') as string,
+      description: formData.get('description') as string || undefined,
+      budget_limit: formData.get('budget_limit') ? parseFloat(formData.get('budget_limit') as string) : undefined,
+    });
+  };
+
+  const handleUpdateBudget = (categoryId: number, budget: number) => {
+    updateCategoryMutation.mutate({
+      id: categoryId,
+      data: { budget_limit: budget }
+    });
+  };
+
   return (
     <DashboardLayout 
       title="Categories" 
@@ -16,7 +134,10 @@ export default function CategoriesPage() {
                 Organize your spending with custom categories and set budgets
               </p>
             </div>
-            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+            <button 
+              onClick={() => setShowCreateForm(true)}
+              className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
               <span className="flex items-center">
                 <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -27,49 +148,217 @@ export default function CategoriesPage() {
           </div>
         </div>
 
-        {/* Default Categories */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h3 className="text-lg font-medium text-gray-900">Default Categories</h3>
-            <p className="text-sm text-gray-600 mt-1">Common expense categories to get you started</p>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {[
-                { name: 'Food & Dining', icon: '🍽️', color: 'bg-red-100 text-red-800', budget: '$500' },
-                { name: 'Transportation', icon: '🚗', color: 'bg-blue-100 text-blue-800', budget: '$200' },
-                { name: 'Shopping', icon: '🛍️', color: 'bg-purple-100 text-purple-800', budget: '$300' },
-                { name: 'Entertainment', icon: '🎬', color: 'bg-green-100 text-green-800', budget: '$150' },
-                { name: 'Bills & Utilities', icon: '⚡', color: 'bg-yellow-100 text-yellow-800', budget: '$400' },
-                { name: 'Healthcare', icon: '🏥', color: 'bg-pink-100 text-pink-800', budget: '$100' },
-              ].map((category, index) => (
-                <div key={index} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center">
-                      <span className="text-2xl mr-3">{category.icon}</span>
-                      <div>
-                        <h4 className="font-medium text-gray-900">{category.name}</h4>
-                        <p className="text-sm text-gray-500">Monthly Budget: {category.budget}</p>
-                      </div>
-                    </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${category.color}`}>
-                      Active
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex justify-between text-sm">
-                      <span className="text-gray-600">Spent this month</span>
-                      <span className="font-medium">$0.00</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div className="bg-blue-600 h-2 rounded-full" style={{ width: '0%' }}></div>
-                    </div>
-                  </div>
+        {/* Create Category Form */}
+        {showCreateForm && (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Create New Category</h3>
+            <form onSubmit={handleCreateCategory} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Category Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    required
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="e.g., Coffee & Snacks"
+                  />
                 </div>
-              ))}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Color
+                  </label>
+                  <input
+                    type="color"
+                    name="color"
+                    defaultValue="#3B82F6"
+                    className="w-full h-10 border border-gray-300 rounded-md"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Monthly Budget (Optional)
+                  </label>
+                  <input
+                    type="number"
+                    name="budget_limit"
+                    step="0.01"
+                    min="0"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="500.00"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Description (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="description"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Brief description"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCreateForm(false)}
+                  className="px-4 py-2 text-gray-700 border border-gray-300 rounded-md hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={createCategoryMutation.isPending}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                >
+                  {createCategoryMutation.isPending ? 'Creating...' : 'Create Category'}
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* Categories List */}
+        {categoriesLoading ? (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+            <div className="text-center">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+              <p className="text-gray-600">Loading categories...</p>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-medium text-gray-900">Your Categories</h3>
+              <p className="text-sm text-gray-600 mt-1">
+                {categoriesData?.categories.length || 0} categories • Track spending and manage budgets
+              </p>
+            </div>
+            <div className="p-6">
+              {!categoriesData?.categories.length ? (
+                <div className="text-center py-8">
+                  <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                  </svg>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Categories Yet</h3>
+                  <p className="text-gray-500 mb-4">
+                    Create your first category to start organizing your expenses
+                  </p>
+                  <button
+                    onClick={() => setShowCreateForm(true)}
+                    className="text-blue-600 hover:text-blue-700 text-sm"
+                  >
+                    Create your first category
+                  </button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {categoriesData.categories.map((category) => {
+                    const spent = spendingData?.[category.id] || 0;
+                    const budget = category.budget_limit || 0;
+                    const progress = calculateBudgetProgress(spent, budget);
+                    const status = getBudgetStatus(spent, budget);
+
+                    return (
+                      <div key={category.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-sm transition-shadow">
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center">
+                            <div 
+                              className="w-4 h-4 rounded-full mr-3"
+                              style={{ backgroundColor: category.color }}
+                            />
+                            <div>
+                              <h4 className="font-medium text-gray-900">{category.name}</h4>
+                              {category.description && (
+                                <p className="text-xs text-gray-500">{category.description}</p>
+                              )}
+                            </div>
+                          </div>
+                          <div className="flex space-x-1">
+                            <button
+                              onClick={() => setEditingCategory(category)}
+                              className="p-1 text-gray-400 hover:text-gray-600"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm('Are you sure you want to delete this category?')) {
+                                  deleteCategoryMutation.mutate(category.id);
+                                }
+                              }}
+                              className="p-1 text-gray-400 hover:text-red-600"
+                            >
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-gray-600">Spent this month</span>
+                            <span className="font-medium">{formatCurrency(spent)}</span>
+                          </div>
+                          
+                          {budget > 0 && (
+                            <>
+                              <div className="flex justify-between text-sm">
+                                <span className="text-gray-600">Budget</span>
+                                <span className="font-medium">{formatCurrency(budget)}</span>
+                              </div>
+                              <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div 
+                                  className={`h-2 rounded-full transition-all ${
+                                    status === 'over-budget' ? 'bg-red-500' :
+                                    status === 'warning' ? 'bg-yellow-500' : 'bg-green-500'
+                                  }`}
+                                  style={{ width: `${progress}%` }}
+                                />
+                              </div>
+                              <div className="flex justify-between text-xs">
+                                <span className={`${
+                                  status === 'over-budget' ? 'text-red-600' :
+                                  status === 'warning' ? 'text-yellow-600' : 'text-green-600'
+                                }`}>
+                                  {progress.toFixed(1)}% used
+                                </span>
+                                <span className="text-gray-500">
+                                  {formatCurrency(Math.max(0, budget - spent))} remaining
+                                </span>
+                              </div>
+                            </>
+                          )}
+                          
+                          {budget === 0 && (
+                            <button
+                              onClick={() => {
+                                const newBudget = prompt('Set monthly budget for this category:');
+                                if (newBudget && !isNaN(parseFloat(newBudget))) {
+                                  handleUpdateBudget(category.id, parseFloat(newBudget));
+                                }
+                              }}
+                              className="text-xs text-blue-600 hover:text-blue-700"
+                            >
+                              + Set Budget
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Category Management Features */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -75,44 +75,43 @@ export default function Sidebar({ className }: SidebarProps) {
         />
       )}
 
-      {/* Top Sidebar - Desktop */}
-      <div className={`fixed top-5 left-0 right-0 z-50 hidden lg:block ${className}`}>
-        <div className="max-w-[1000px] mx-auto bg-white shadow-sm border-b border-gray-200 rounded-lg">
-          <div className="flex items-center justify-between h-16 px-4 sm:px-6 lg:px-8">
-            {/* Logo */}
-            <div className="flex items-center">
-              <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-sm">ET</span>
-              </div>
-              <span className="ml-3 text-lg font-semibold text-gray-900">
-                ExpenseTracker
+      {/* Desktop Sidebar - Floating within centered container */}
+      <div className={`fixed top-6 left-[10%] z-30 w-56 h-[calc(100vh-3rem)] bg-white rounded-xl border border-gray-100 hidden lg:flex lg:flex-col ${className}`}>
+        {/* Logo */}
+        <div className="flex items-center h-16 px-6 border-b border-gray-100">
+          <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+            <span className="text-white font-bold text-sm">ET</span>
+          </div>
+          <span className="ml-3 text-lg font-semibold text-gray-900">
+            ExpenseTracker
+          </span>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 px-3 py-6 space-y-1 overflow-y-auto">
+          {navigation.map((item) => (
+            <Link
+              key={item.name}
+              to={item.href}
+              className={`flex items-center px-3 py-3 text-sm font-medium rounded-xl transition-all duration-200 group ${
+                isActive(item.href)
+                  ? 'bg-blue-50 text-blue-700 shadow-sm'
+                  : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <span className={`mr-3 ${isActive(item.href) ? 'text-blue-700' : 'text-gray-400 group-hover:text-gray-500'}`}>
+                {item.icon}
               </span>
-            </div>
+              {item.name}
+            </Link>
+          ))}
+        </nav>
 
-            {/* Navigation */}
-            <nav className="flex space-x-1">
-              {navigation.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
-                  }`}
-                >
-                  <span className={`mr-2 ${isActive(item.href) ? 'text-blue-700' : 'text-gray-400'}`}>
-                    {item.icon}
-                  </span>
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-
-            {/* Version info */}
-            <div className="text-xs text-gray-500">
-              <p>v1.0.0</p>
-            </div>
+        {/* Footer */}
+        <div className="p-4 border-t border-gray-100">
+          <div className="text-xs text-gray-500 text-center">
+            <p className="font-medium">ExpenseTracker</p>
+            <p className="mt-1">v1.0.0</p>
           </div>
         </div>
       </div>
@@ -151,7 +150,7 @@ export default function Sidebar({ className }: SidebarProps) {
                 key={item.name}
                 to={item.href}
                 onClick={() => setSidebarOpen(false)}
-                className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
+                className={`flex items-center px-3 py-3 text-sm font-medium rounded-lg transition-colors ${
                   isActive(item.href)
                     ? 'bg-blue-50 text-blue-700 border-r-2 border-blue-700'
                     : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'

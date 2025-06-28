@@ -8,7 +8,10 @@ import type {
 export const transactionService = {
   // Get transactions with filters and pagination
   async getTransactions(filters: TransactionFilters = {}): Promise<TransactionsResponse> {
-    return apiClient.get<TransactionsResponse>('/transactions', filters);
+    const data = await apiClient.get<TransactionsResponse>('/transactions', filters);
+    console.log("Transactions data:", data);
+    return data;
+
   },
 
   // Get a single transaction
