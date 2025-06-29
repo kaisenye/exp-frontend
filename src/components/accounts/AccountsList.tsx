@@ -113,26 +113,26 @@ export default function AccountsList({ className }: AccountsListProps) {
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="bg-white rounded-lg border border-gray-200 p-6 animate-pulse"
+            className="bg-white dark:bg-neutral-800 rounded-lg border border-gray-200 dark:border-neutral-700 p-6 animate-pulse transition-colors duration-200"
           >
             <div className="flex justify-between items-start mb-4">
               <div className="flex-1">
-                <div className="h-6 bg-gray-200 rounded w-1/3 mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+                <div className="h-6 bg-gray-200 dark:bg-neutral-600 rounded w-1/3 mb-2"></div>
+                <div className="h-4 bg-gray-200 dark:bg-neutral-600 rounded w-1/2"></div>
               </div>
               <div className="flex gap-2">
-                <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
-                <div className="h-6 w-16 bg-gray-200 rounded-full"></div>
+                <div className="h-6 w-16 bg-gray-200 dark:bg-neutral-600 rounded-full"></div>
+                <div className="h-6 w-16 bg-gray-200 dark:bg-neutral-600 rounded-full"></div>
               </div>
             </div>
-            <div className="h-8 bg-gray-200 rounded w-1/4 mb-4"></div>
+            <div className="h-8 bg-gray-200 dark:bg-neutral-600 rounded w-1/4 mb-4"></div>
             <div className="grid grid-cols-2 gap-4 mb-4">
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
-              <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-neutral-600 rounded w-3/4"></div>
+              <div className="h-4 bg-gray-200 dark:bg-neutral-600 rounded w-3/4"></div>
             </div>
-            <div className="flex gap-2 pt-4 border-t border-gray-100">
-              <div className="h-8 w-16 bg-gray-200 rounded"></div>
-              <div className="h-8 w-20 bg-gray-200 rounded"></div>
+            <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-neutral-600">
+              <div className="h-8 w-16 bg-gray-200 dark:bg-neutral-600 rounded"></div>
+              <div className="h-8 w-20 bg-gray-200 dark:bg-neutral-600 rounded"></div>
             </div>
           </div>
         ))}
@@ -143,7 +143,7 @@ export default function AccountsList({ className }: AccountsListProps) {
   if (error) {
     return (
       <div className={`text-center py-8 ${className}`}>
-        <div className="text-red-600 mb-4">
+        <div className="text-red-600 dark:text-red-400 mb-4">
           <svg
             className="w-12 h-12 mx-auto mb-2"
             fill="none"
@@ -159,10 +159,10 @@ export default function AccountsList({ className }: AccountsListProps) {
             />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
+        <h3 className="text-lg font-medium text-gray-900 dark:text-neutral-100 mb-2">
           Failed to load accounts
         </h3>
-        <p className="text-gray-600 mb-4">
+        <p className="text-gray-600 dark:text-neutral-400 mb-4">
           {error instanceof Error ? error.message : 'An unexpected error occurred'}
         </p>
         <Button onClick={() => refetch()} variant="primary">
@@ -177,7 +177,7 @@ export default function AccountsList({ className }: AccountsListProps) {
   if (accounts.length === 0) {
     return (
       <div className={`text-center py-12 ${className}`}>
-        <div className="text-gray-400 mb-4">
+        <div className="text-gray-400 dark:text-neutral-500 mb-4">
           <svg
             className="w-16 h-16 mx-auto mb-4"
             fill="none"
@@ -193,10 +193,10 @@ export default function AccountsList({ className }: AccountsListProps) {
             />
           </svg>
         </div>
-        <h3 className="text-xl font-medium text-gray-900 mb-2">
+        <h3 className="text-xl font-medium text-gray-900 dark:text-neutral-100 mb-2">
           No accounts connected
         </h3>
-        <p className="text-gray-600 mb-6">
+        <p className="text-gray-600 dark:text-neutral-400 mb-6">
           Connect your bank account to start tracking your expenses and income.
         </p>
         <PlaidLinkButton
@@ -215,8 +215,8 @@ export default function AccountsList({ className }: AccountsListProps) {
       {/* Header */}
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Bank Accounts</h2>
-          <p className="text-gray-600">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-neutral-100">Bank Accounts</h2>
+          <p className="text-gray-600 dark:text-neutral-400">
             {accounts.length} account{accounts.length !== 1 ? 's' : ''} connected
           </p>
         </div>
@@ -257,29 +257,29 @@ export default function AccountsList({ className }: AccountsListProps) {
       {/* Summary */}
       {accountsData?.summary && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-          <div className="bg-blue-50 rounded-lg p-4">
-            <div className="text-blue-600 text-sm font-medium">Total Balance</div>
-            <div className="text-2xl font-bold text-blue-900">
+          <div className="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 transition-colors duration-200">
+            <div className="text-blue-600 dark:text-blue-400 text-sm font-medium">Total Balance</div>
+            <div className="text-2xl font-bold text-blue-900 dark:text-blue-100">
               ${accountsData.summary.total_balance.toFixed(2)}
             </div>
           </div>
-          <div className="bg-green-50 rounded-lg p-4">
-            <div className="text-green-600 text-sm font-medium">Available</div>
-            <div className="text-2xl font-bold text-green-900">
+          <div className="bg-green-50 dark:bg-green-900/30 rounded-lg p-4 transition-colors duration-200">
+            <div className="text-green-600 dark:text-green-400 text-sm font-medium">Available</div>
+            <div className="text-2xl font-bold text-green-900 dark:text-green-100">
               ${accountsData.summary.total_available.toFixed(2)}
             </div>
           </div>
-          <div className="bg-purple-50 rounded-lg p-4">
-            <div className="text-purple-600 text-sm font-medium">Accounts</div>
-            <div className="text-2xl font-bold text-purple-900">
+          <div className="bg-purple-50 dark:bg-purple-900/30 rounded-lg p-4 transition-colors duration-200">
+            <div className="text-purple-600 dark:text-purple-400 text-sm font-medium">Accounts</div>
+            <div className="text-2xl font-bold text-purple-900 dark:text-purple-100">
               {accountsData.summary.account_count}
             </div>
           </div>
         </div>
       )}
 
-      {/* Accounts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+      {/* Accounts Grid - Changed from 3 to 2 per row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {accounts.map((account: Account) => (
           <AccountCard
             key={account.id}

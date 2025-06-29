@@ -1,4 +1,3 @@
-import React from 'react';
 import { Button } from '../ui/Button';
 import { formatCurrency } from '../../utils/formatters.ts';
 import type { Account } from '../../types';
@@ -19,22 +18,22 @@ export default function AccountCard({
   const getAccountTypeColor = (type: string) => {
     switch (type.toLowerCase()) {
       case 'checking':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300';
       case 'savings':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
       case 'credit':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
       case 'investment':
-        return 'bg-purple-100 text-purple-800';
+        return 'bg-purple-100 dark:bg-purple-900/30 text-purple-800 dark:text-purple-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 dark:bg-neutral-700 text-gray-800 dark:text-neutral-300';
     }
   };
 
   const getStatusColor = (active: boolean) => {
     return active
-      ? 'bg-green-100 text-green-800'
-      : 'bg-red-100 text-red-800';
+      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
+      : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300';
   };
 
   const formatAccountId = (id: number) => {
@@ -42,14 +41,14 @@ export default function AccountCard({
   };
 
   return (
-    <div className="bg-white rounded-lg border border-gray-200 p-6 hover:shadow-md transition-shadow">
+    <div className="bg-white dark:bg-neutral-800 rounded-lg border border-gray-200 dark:border-neutral-700 p-6 hover:shadow-md dark:hover:shadow-lg hover:shadow-gray-200 dark:hover:shadow-neutral-900/50 transition-all duration-200">
       {/* Header */}
       <div className="flex justify-between items-start mb-4">
         <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-900 mb-1">
+          <h3 className="text-lg font-semibold text-gray-900 dark:text-neutral-100 mb-1">
             {account.display_name || account.name}
           </h3>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-neutral-400">
             {account.institution_name} • {formatAccountId(account.id)}
           </p>
         </div>
@@ -74,11 +73,11 @@ export default function AccountCard({
       {/* Balance */}
       <div className="mb-4">
         <div className="flex items-baseline gap-2">
-          <span className="text-2xl font-bold text-gray-900">
+          <span className="text-2xl font-bold text-gray-900 dark:text-neutral-100">
             {formatCurrency(account.balance_current)}
           </span>
           {account.balance_available !== account.balance_current && (
-            <span className="text-sm text-gray-500">
+            <span className="text-sm text-gray-500 dark:text-neutral-400">
               Available: {formatCurrency(account.balance_available)}
             </span>
           )}
@@ -88,13 +87,13 @@ export default function AccountCard({
       {/* Metadata */}
       <div className="grid grid-cols-2 gap-4 mb-4 text-sm">
         <div>
-          <span className="text-gray-500">Currency:</span>
-          <span className="ml-2 uppercase">{account.currency}</span>
+          <span className="text-gray-500 dark:text-neutral-400">Currency:</span>
+          <span className="ml-2 uppercase text-gray-900 dark:text-neutral-100">{account.currency}</span>
         </div>
         {account.last_sync_at && (
           <div>
-            <span className="text-gray-500">Last Synced:</span>
-            <span className="ml-2">
+            <span className="text-gray-500 dark:text-neutral-400">Last Synced:</span>
+            <span className="ml-2 text-gray-900 dark:text-neutral-100">
               {new Date(account.last_sync_at).toLocaleDateString()}
             </span>
           </div>
@@ -102,7 +101,7 @@ export default function AccountCard({
       </div>
 
       {/* Actions */}
-      <div className="flex gap-2 pt-4 border-t border-gray-100">
+      <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-neutral-600">
         {onSync && (
           <Button
             variant="outline"
@@ -137,7 +136,7 @@ export default function AccountCard({
             size="sm"
             onClick={() => onDisconnect(account.id)}
             disabled={isLoading}
-            className="text-red-600 hover:text-red-700 hover:border-red-300"
+            className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:border-red-300 dark:hover:border-red-500"
             icon={
               <svg
                 className="w-4 h-4"

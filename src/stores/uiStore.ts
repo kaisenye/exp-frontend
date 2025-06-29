@@ -11,62 +11,109 @@ interface UIState {
   setSidebarOpen: (open: boolean) => void;
   toggleSidebar: () => void;
   toggleTheme: () => void;
+  setTheme: (theme: 'light' | 'dark') => void;
   addNotification: (notification: Omit<Notification, 'id'>) => void;
   removeNotification: (id: string) => void;
   clearNotifications: () => void;
 }
 
+// Helper function to get initial theme
+const getInitialTheme = (): 'light' | 'dark' => {
+  if (typeof window === 'undefined') return 'light';
+  
+  const savedTheme = localStorage.getItem('theme') as 'light' | 'dark' | null;
+  if (savedTheme) return savedTheme;
+  
+  // Check system preference
+  if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+    return 'dark';
+  }
+  
+  return 'light';
+};
+
+// Helper function to apply theme to document
+const applyTheme = (theme: 'light' | 'dark') => {
+  if (typeof window === 'undefined') return;
+  
+  const root = window.document.documentElement;
+  
+  console.log('Applying theme:', theme);
+  console.log('Root element before:', root.classList.toString());
+  
+  if (theme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+  
+  console.log('Root element after:', root.classList.toString());
+  localStorage.setItem('theme', theme);
+};
+
 export const useUIStore = create<UIState>()(
   devtools(
-    (set, get) => ({
-      sidebarOpen: false,
-      theme: 'light',
-      notifications: [],
+    (set, get) => {
+      const initialTheme = getInitialTheme();
+      applyTheme(initialTheme);
+      
+      return {
+        sidebarOpen: false,
+        theme: initialTheme,
+        notifications: [],
 
-      setSidebarOpen: (open: boolean) => {
-        set({ sidebarOpen: open });
-      },
+        setSidebarOpen: (open: boolean) => {
+          set({ sidebarOpen: open });
+        },
 
-      toggleSidebar: () => {
-        set((state) => ({ sidebarOpen: !state.sidebarOpen }));
-      },
+        toggleSidebar: () => {
+          set((state) => ({ sidebarOpen: !state.sidebarOpen }));
+        },
 
-      toggleTheme: () => {
-        set((state) => ({ 
-          theme: state.theme === 'light' ? 'dark' : 'light' 
-        }));
-      },
+        toggleTheme: () => {
+          set((state) => {
+            const newTheme = state.theme === 'light' ? 'dark' : 'light';
+            applyTheme(newTheme);
+            return { theme: newTheme };
+          });
+        },
 
-      addNotification: (notification: Omit<Notification, 'id'>) => {
-        const id = Math.random().toString(36).substring(2, 9);
-        const newNotification: Notification = {
-          ...notification,
-          id,
-          duration: notification.duration || 5000,
-        };
+        setTheme: (theme: 'light' | 'dark') => {
+          applyTheme(theme);
+          set({ theme });
+        },
 
-        set((state) => ({
-          notifications: [...state.notifications, newNotification],
-        }));
+        addNotification: (notification: Omit<Notification, 'id'>) => {
+          const id = Math.random().toString(36).substring(2, 9);
+          const newNotification: Notification = {
+            ...notification,
+            id,
+            duration: notification.duration || 5000,
+          };
 
-        // Auto-remove notification after duration
-        if (newNotification.duration && newNotification.duration > 0) {
-          setTimeout(() => {
-            get().removeNotification(id);
-          }, newNotification.duration);
-        }
-      },
+          set((state) => ({
+            notifications: [...state.notifications, newNotification],
+          }));
 
-      removeNotification: (id: string) => {
-        set((state) => ({
-          notifications: state.notifications.filter((n) => n.id !== id),
-        }));
-      },
+          // Auto-remove notification after duration
+          if (newNotification.duration && newNotification.duration > 0) {
+            setTimeout(() => {
+              get().removeNotification(id);
+            }, newNotification.duration);
+          }
+        },
 
-      clearNotifications: () => {
-        set({ notifications: [] });
-      },
-    }),
+        removeNotification: (id: string) => {
+          set((state) => ({
+            notifications: state.notifications.filter((n) => n.id !== id),
+          }));
+        },
+
+        clearNotifications: () => {
+          set({ notifications: [] });
+        },
+      };
+    },
     {
       name: 'ui-store',
     }

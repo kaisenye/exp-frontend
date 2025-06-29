@@ -60,13 +60,13 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex items-center justify-center bg-neutral-50 mt-20">
+    <div className="flex items-center justify-center bg-neutral-50 dark:bg-neutral-900 mt-20 transition-colors duration-200">
       <div className="max-w-sm w-full">
         <div>
-          <h2 className="mt-6 text-center text-h1 font-bold text-neutral-900">
+          <h2 className="mt-6 text-center text-h1 font-bold text-neutral-900 dark:text-neutral-100">
             Create Account
           </h2>
-          <p className="mt-2 text-center text-sm text-neutral-600">
+          <p className="mt-2 text-center text-sm text-neutral-600 dark:text-neutral-400">
             Start tracking your expenses today
           </p>
         </div>
@@ -75,90 +75,90 @@ export default function RegisterPage() {
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-10">
               <div>
-                <label htmlFor="first_name" className="block text-sm font-medium text-neutral-700">
+                <label htmlFor="first_name" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   First name
                 </label>
                 <input
                   {...register('first_name')}
                   type="text"
                   autoComplete="given-name"
-                  className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent placeholder:text-neutral-400 bg-white"
+                  className="mt-1 w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400 focus:border-transparent placeholder:text-neutral-400 dark:placeholder:text-neutral-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                   placeholder="First name"
                 />
                 {errors.first_name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.first_name.message}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.first_name.message}</p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="last_name" className="block text-sm font-medium text-neutral-700">
+                <label htmlFor="last_name" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                   Last name
                 </label>
                 <input
                   {...register('last_name')}
                   type="text"
                   autoComplete="family-name"
-                  className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent placeholder:text-neutral-400 bg-white"
+                  className="mt-1 w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400 focus:border-transparent placeholder:text-neutral-400 dark:placeholder:text-neutral-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                   placeholder="Last name"
                 />
                 {errors.last_name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.last_name.message}</p>
+                  <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.last_name.message}</p>
                 )}
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-neutral-700">
+              <label htmlFor="email" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Email address
               </label>
               <input
                 {...register('email')}
                 type="email"
                 autoComplete="email"
-                className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent placeholder:text-neutral-400 bg-white"
+                className="mt-1 w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400 focus:border-transparent placeholder:text-neutral-400 dark:placeholder:text-neutral-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 placeholder="Enter your email"
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Password
               </label>
               <input
                 {...register('password')}
                 type="password"
                 autoComplete="new-password"
-                className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent placeholder:text-neutral-400 bg-white"
+                className="mt-1 w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400 focus:border-transparent placeholder:text-neutral-400 dark:placeholder:text-neutral-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 placeholder="Create a password"
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password.message}</p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password_confirmation" className="block text-sm font-medium text-neutral-700">
+              <label htmlFor="password_confirmation" className="block text-sm font-medium text-neutral-700 dark:text-neutral-300">
                 Confirm password
               </label>
               <input
                 {...register('password_confirmation')}
                 type="password"
                 autoComplete="new-password"
-                className="mt-1 w-full px-3 py-2 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-transparent placeholder:text-neutral-400 bg-white"
+                className="mt-1 w-full px-3 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 dark:focus:ring-neutral-400 focus:border-transparent placeholder:text-neutral-400 dark:placeholder:text-neutral-500 bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100"
                 placeholder="Confirm your password"
               />
               {errors.password_confirmation && (
-                <p className="mt-1 text-sm text-red-600">{errors.password_confirmation.message}</p>
+                <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.password_confirmation.message}</p>
               )}
             </div>
           </div>
 
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-sm text-red-700">{error}</p>
+            <div className="bg-red-50 dark:bg-red-900/50 border border-red-200 dark:border-red-700 rounded-lg p-4">
+              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
             </div>
           )}
 
@@ -174,9 +174,9 @@ export default function RegisterPage() {
           </div>
 
           <div className="text-center">
-            <p className="text-sm text-neutral-600">
+            <p className="text-sm text-neutral-600 dark:text-neutral-400">
               Already have an account?{' '}
-              <Link to="/login" className="font-medium text-neutral-900 hover:text-neutral-700 underline">
+              <Link to="/login" className="font-medium text-neutral-900 dark:text-neutral-100 hover:text-neutral-700 dark:hover:text-neutral-300 underline">
                 Sign in
               </Link>
             </p>

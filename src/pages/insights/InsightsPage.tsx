@@ -4,6 +4,10 @@ import DashboardLayout from '../../components/layout/Layout';
 import { transactionService } from '../../services/transactions';
 import { accountService } from '../../services/accounts';
 import { categoryService } from '../../services/categories';
+import { 
+  CalendarIcon,
+  ArrowPathIcon
+} from '@heroicons/react/24/outline';
 
 export default function InsightsPage() {
   const [timeRange, setTimeRange] = useState<'7d' | '30d' | '90d' | '1y'>('30d');
@@ -150,15 +154,15 @@ export default function InsightsPage() {
   const getBudgetStatusColor = (status: string) => {
     switch (status) {
       case 'excellent':
-        return 'text-green-600 bg-green-50';
+        return 'text-green-600 dark:text-green-400';
       case 'good':
-        return 'text-blue-600 bg-blue-50';
+        return 'text-blue-600 dark:text-blue-400';
       case 'on-track':
-        return 'text-yellow-600 bg-yellow-50';
+        return 'text-yellow-600 dark:text-yellow-400';
       case 'over-budget':
-        return 'text-red-600 bg-red-50';
+        return 'text-red-600 dark:text-red-400';
       default:
-        return 'text-gray-600 bg-gray-50';
+        return 'text-gray-600 dark:text-neutral-400';
     }
   };
 
@@ -177,119 +181,119 @@ export default function InsightsPage() {
     }
   };
 
+  const getTimeRangeLabel = (range: '7d' | '30d' | '90d' | '1y') => {
+    const labels = {
+      '7d': 'Last 7 days',
+      '30d': 'Last 30 days',
+      '90d': 'Last 90 days',
+      '1y': 'Last year',
+    };
+    return labels[range];
+  };
+
   return (
-    <DashboardLayout 
-      title="Insights" 
-      subtitle="Financial analytics and spending insights"
-    >
+    <DashboardLayout>
       <div className="space-y-6">
-        {/* Time Range Selector */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-          <div className="flex justify-between items-center">
-            <div>
-              <h2 className="text-lg font-semibold text-gray-900">Financial Overview</h2>
-              <p className="text-sm text-gray-600 mt-1">
-                Analyze your spending patterns and financial health
-              </p>
-            </div>
-            <div className="flex space-x-2">
-              {[
-                { key: '7d', label: '7 Days' },
-                { key: '30d', label: '30 Days' },
-                { key: '90d', label: '90 Days' },
-                { key: '1y', label: '1 Year' }
-              ].map((option) => (
-                <button
-                  key={option.key}
-                  onClick={() => setTimeRange(option.key as any)}
-                  className={`px-3 py-2 text-sm rounded-md transition-colors ${
-                    timeRange === option.key
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                  }`}
-                >
-                  {option.label}
-                </button>
+        {/* Header */}
+        <div className="flex justify-between items-start">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-neutral-100">Financial Insights</h1>
+            <p className="text-gray-600 dark:text-neutral-400">Understand your spending patterns and trends</p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <select
+              value={timeRange}
+              onChange={(e) => setTimeRange(e.target.value as '7d' | '30d' | '90d' | '1y')}
+              className="px-3 py-2 border border-gray-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-700 text-gray-900 dark:text-neutral-100 focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-transparent"
+            >
+              {['7d', '30d', '90d', '1y'].map(range => (
+                <option key={range} value={range}>
+                  {getTimeRangeLabel(range as '7d' | '30d' | '90d' | '1y')}
+                </option>
               ))}
-            </div>
+            </select>
+            <button className="flex items-center px-4 py-2 text-gray-700 dark:text-neutral-300 bg-gray-100 dark:bg-neutral-700 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-600 transition-colors">
+              <ArrowPathIcon className="w-4 h-4 mr-2" />
+              Refresh
+            </button>
           </div>
         </div>
 
         {transactionsLoading ? (
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+          <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 p-8 transition-colors duration-200">
             <div className="text-center">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
-              <p className="text-gray-600">Loading insights...</p>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 dark:border-blue-400 mx-auto mb-4"></div>
+              <p className="text-gray-600 dark:text-neutral-400">Loading insights...</p>
             </div>
           </div>
         ) : (
           <>
             {/* Key Metrics */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
                 <div className="flex items-center">
-                  <div className="p-2 bg-green-100 rounded-lg">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                    <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Savings Rate</p>
-                    <p className="text-2xl font-bold text-gray-900">{insights.savingsRate.toFixed(1)}%</p>
-                    <p className={`text-xs ${insights.savingsRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className="text-sm font-medium text-gray-600 dark:text-neutral-400">Savings Rate</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-neutral-100">{insights.savingsRate.toFixed(1)}%</p>
+                    <p className={`text-xs ${insights.savingsRate >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {insights.savingsRate >= 20 ? 'Excellent!' : insights.savingsRate >= 10 ? 'Good progress' : insights.savingsRate >= 0 ? 'On track' : 'Needs attention'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
                 <div className="flex items-center">
-                  <div className="p-2 bg-purple-100 rounded-lg">
-                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
+                    <svg className="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Top Category</p>
-                    <p className="text-lg font-bold text-gray-900">
+                    <p className="text-sm font-medium text-gray-600 dark:text-neutral-400">Top Category</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-neutral-100">
                       {insights.topCategory?.name || 'No data'}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-neutral-400">
                       {insights.topCategory ? formatCurrency(insights.topCategory.amount) : 'N/A'}
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
                 <div className="flex items-center">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                    <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                     </svg>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Avg Daily Spend</p>
-                    <p className="text-2xl font-bold text-gray-900">{formatCurrency(insights.avgDailySpend)}</p>
-                    <p className={`text-xs ${insights.monthlyComparison >= 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <p className="text-sm font-medium text-gray-600 dark:text-neutral-400">Avg Daily Spend</p>
+                    <p className="text-2xl font-bold text-gray-900 dark:text-neutral-100">{formatCurrency(insights.avgDailySpend)}</p>
+                    <p className={`text-xs ${insights.monthlyComparison >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
                       {formatPercentage(insights.monthlyComparison)} vs last period
                     </p>
                   </div>
                 </div>
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+              <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
                 <div className="flex items-center">
-                  <div className="p-2 bg-yellow-100 rounded-lg">
+                  <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
                     <span className="text-2xl">{getBudgetStatusIcon(insights.budgetStatus)}</span>
                   </div>
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Budget Status</p>
+                    <p className="text-sm font-medium text-gray-600 dark:text-neutral-400">Budget Status</p>
                     <p className={`text-lg font-bold capitalize ${getBudgetStatusColor(insights.budgetStatus)}`}>
                       {insights.budgetStatus.replace('-', ' ')}
                     </p>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-neutral-400">
                       {insights.totalSpent > 0 ? formatCurrency(insights.totalSpent) + ' spent' : 'No spending'}
                     </p>
                   </div>
@@ -299,8 +303,8 @@ export default function InsightsPage() {
 
             {/* Category Breakdown */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Category Breakdown</h3>
+              <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-neutral-100 mb-4">Category Breakdown</h3>
                 {insights.categoryBreakdown.length > 0 ? (
                   <div className="space-y-4">
                     {insights.categoryBreakdown.map((category, index) => (
@@ -311,63 +315,63 @@ export default function InsightsPage() {
                             style={{ backgroundColor: category.color }}
                           />
                           <div>
-                            <p className="font-medium text-gray-900">{category.name}</p>
-                            <p className="text-sm text-gray-500">{category.count} transactions</p>
+                            <p className="font-medium text-gray-900 dark:text-neutral-100">{category.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-neutral-400">{category.count} transactions</p>
                           </div>
                         </div>
                         <div className="text-right">
-                          <p className="font-semibold text-gray-900">{formatCurrency(category.amount)}</p>
-                          <p className="text-sm text-gray-500">{category.percentage.toFixed(1)}%</p>
+                          <p className="font-semibold text-gray-900 dark:text-neutral-100">{formatCurrency(category.amount)}</p>
+                          <p className="text-sm text-gray-500 dark:text-neutral-400">{category.percentage.toFixed(1)}%</p>
                         </div>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <div className="text-center py-8">
-                    <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-16 h-16 text-gray-400 dark:text-neutral-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
-                    <p className="text-gray-500">No spending data available for this period</p>
+                    <p className="text-gray-500 dark:text-neutral-400">No spending data available for this period</p>
                   </div>
                 )}
               </div>
 
-              <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Financial Summary</h3>
+              <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-neutral-100 mb-4">Financial Summary</h3>
                 <div className="space-y-4">
-                  <div className="flex justify-between items-center p-4 bg-green-50 rounded-lg">
+                  <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <div>
-                      <p className="text-sm font-medium text-green-800">Total Income</p>
-                      <p className="text-2xl font-bold text-green-900">{formatCurrency(insights.totalIncome)}</p>
+                      <p className="text-sm font-medium text-green-800 dark:text-green-400">Total Income</p>
+                      <p className="text-2xl font-bold text-green-900 dark:text-green-300">{formatCurrency(insights.totalIncome)}</p>
                     </div>
-                    <div className="p-2 bg-green-100 rounded-lg">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
+                      <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 11l5-5m0 0l5 5m-5-5v12" />
                       </svg>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center p-4 bg-red-50 rounded-lg">
+                  <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                     <div>
-                      <p className="text-sm font-medium text-red-800">Total Expenses</p>
-                      <p className="text-2xl font-bold text-red-900">{formatCurrency(insights.totalSpent)}</p>
+                      <p className="text-sm font-medium text-red-800 dark:text-red-400">Total Expenses</p>
+                      <p className="text-2xl font-bold text-red-900 dark:text-red-300">{formatCurrency(insights.totalSpent)}</p>
                     </div>
-                    <div className="p-2 bg-red-100 rounded-lg">
-                      <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
+                      <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 13l-5 5m0 0l-5-5m5 5V6" />
                       </svg>
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center p-4 bg-blue-50 rounded-lg">
+                  <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div>
-                      <p className="text-sm font-medium text-blue-800">Net Amount</p>
-                      <p className={`text-2xl font-bold ${insights.totalIncome - insights.totalSpent >= 0 ? 'text-blue-900' : 'text-red-900'}`}>
+                      <p className="text-sm font-medium text-blue-800 dark:text-blue-400">Net Amount</p>
+                      <p className={`text-2xl font-bold ${insights.totalIncome - insights.totalSpent >= 0 ? 'text-blue-900 dark:text-blue-300' : 'text-red-900 dark:text-red-300'}`}>
                         {formatCurrency(insights.totalIncome - insights.totalSpent)}
                       </p>
                     </div>
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
+                      <svg className="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       </svg>
                     </div>
@@ -377,11 +381,11 @@ export default function InsightsPage() {
             </div>
 
             {/* Insights and Recommendations */}
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Smart Insights & Recommendations</h3>
+            <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
+              <h3 className="text-lg font-medium text-gray-900 dark:text-neutral-100 mb-4">Smart Insights & Recommendations</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {insights.savingsRate < 10 && (
-                  <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
                     <div className="flex">
                       <div className="flex-shrink-0">
                         <svg className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
@@ -389,8 +393,8 @@ export default function InsightsPage() {
                         </svg>
                       </div>
                       <div className="ml-3">
-                        <h4 className="text-sm font-medium text-yellow-800">Improve Your Savings Rate</h4>
-                        <p className="text-sm text-yellow-700 mt-1">
+                        <h4 className="text-sm font-medium text-yellow-800 dark:text-yellow-400">Improve Your Savings Rate</h4>
+                        <p className="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
                           Your current savings rate is {insights.savingsRate.toFixed(1)}%. Consider reducing spending in your top categories to reach the recommended 20% savings rate.
                         </p>
                       </div>
@@ -399,7 +403,7 @@ export default function InsightsPage() {
                 )}
 
                 {insights.topCategory && insights.topCategory.percentage > 40 && (
-                  <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                  <div className="p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
                     <div className="flex">
                       <div className="flex-shrink-0">
                         <svg className="w-5 h-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
@@ -407,8 +411,8 @@ export default function InsightsPage() {
                         </svg>
                       </div>
                       <div className="ml-3">
-                        <h4 className="text-sm font-medium text-blue-800">High Spending Alert</h4>
-                        <p className="text-sm text-blue-700 mt-1">
+                        <h4 className="text-sm font-medium text-blue-800 dark:text-blue-400">High Spending Alert</h4>
+                        <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
                           {insights.topCategory.name} represents {insights.topCategory.percentage.toFixed(1)}% of your spending. Consider setting a budget for this category.
                         </p>
                       </div>
@@ -417,7 +421,7 @@ export default function InsightsPage() {
                 )}
 
                 {insights.avgDailySpend > 100 && (
-                  <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
+                  <div className="p-4 bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg">
                     <div className="flex">
                       <div className="flex-shrink-0">
                         <svg className="w-5 h-5 text-purple-400" fill="currentColor" viewBox="0 0 20 20">
@@ -425,8 +429,8 @@ export default function InsightsPage() {
                         </svg>
                       </div>
                       <div className="ml-3">
-                        <h4 className="text-sm font-medium text-purple-800">Daily Spending Tracking</h4>
-                        <p className="text-sm text-purple-700 mt-1">
+                        <h4 className="text-sm font-medium text-purple-800 dark:text-purple-400">Daily Spending Tracking</h4>
+                        <p className="text-sm text-purple-700 dark:text-purple-300 mt-1">
                           Your average daily spend is {formatCurrency(insights.avgDailySpend)}. Try tracking daily expenses to identify areas for improvement.
                         </p>
                       </div>
@@ -435,7 +439,7 @@ export default function InsightsPage() {
                 )}
 
                 {insights.savingsRate >= 20 && (
-                  <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                  <div className="p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
                     <div className="flex">
                       <div className="flex-shrink-0">
                         <svg className="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
@@ -443,14 +447,139 @@ export default function InsightsPage() {
                         </svg>
                       </div>
                       <div className="ml-3">
-                        <h4 className="text-sm font-medium text-green-800">Excellent Financial Health!</h4>
-                        <p className="text-sm text-green-700 mt-1">
+                        <h4 className="text-sm font-medium text-green-800 dark:text-green-400">Excellent Financial Health!</h4>
+                        <p className="text-sm text-green-700 dark:text-green-300 mt-1">
                           Your {insights.savingsRate.toFixed(1)}% savings rate is excellent! Consider investing the excess for long-term growth.
                         </p>
                       </div>
                     </div>
                   </div>
                 )}
+              </div>
+            </div>
+
+            {/* Top Categories */}
+            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 p-6 transition-colors duration-200">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-neutral-100">Top Spending Categories</h2>
+                  <p className="text-sm text-gray-600 dark:text-neutral-400">Where your money is going</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {insights.categoryBreakdown.map((category, index) => (
+                  <div key={category.name} className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full text-white text-sm font-medium" style={{ backgroundColor: category.color }}>
+                        {index + 1}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-900 dark:text-neutral-100">{category.name}</div>
+                        <div className="text-sm text-gray-600 dark:text-neutral-400">{category.percentage.toFixed(1)}% of spending</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-semibold text-gray-900 dark:text-neutral-100">{formatCurrency(category.amount)}</div>
+                      <div className="w-24 bg-gray-200 dark:bg-neutral-600 rounded-full h-2 mt-1">
+                        <div 
+                          className="h-2 rounded-full" 
+                          style={{ 
+                            width: `${category.percentage}%`, 
+                            backgroundColor: category.color 
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Monthly Breakdown */}
+            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 p-6 transition-colors duration-200">
+              <div className="flex items-center justify-between mb-6">
+                <div>
+                  <h2 className="text-lg font-medium text-gray-900 dark:text-neutral-100">Monthly Trends</h2>
+                  <p className="text-sm text-gray-600 dark:text-neutral-400">Income vs expenses over time</p>
+                </div>
+                <CalendarIcon className="w-6 h-6 text-gray-400 dark:text-neutral-500" />
+              </div>
+
+              <div className="space-y-4">
+                {transactionsData?.transactions.map((transaction) => (
+                  <div key={transaction.id} className="border border-gray-200 dark:border-neutral-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-medium text-gray-900 dark:text-neutral-100">{transaction.primary_category?.name || 'Uncategorized'} 2024</h3>
+                      <div className={`text-sm font-medium ${
+                        transaction.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
+                      }`}>
+                        {transaction.amount > 0 ? '+' : ''} {formatCurrency(Math.abs(transaction.amount))}
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-neutral-400">Income</span>
+                        <span className="font-medium text-green-600 dark:text-green-400">
+                          {transaction.amount > 0 ? '+' : ''} {formatCurrency(transaction.amount)}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600 dark:text-neutral-400">Expenses</span>
+                        <span className="font-medium text-red-600 dark:text-red-400">
+                          {transaction.amount < 0 ? '+' : ''} {formatCurrency(Math.abs(transaction.amount))}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Visual bar representation */}
+                    <div className="mt-3 relative h-2 bg-gray-200 dark:bg-neutral-600 rounded-full overflow-hidden">
+                      <div 
+                        className="absolute left-0 top-0 h-full bg-green-500 dark:bg-green-400"
+                        style={{ width: `${(Math.abs(transaction.amount) / Math.max(Math.abs(transaction.amount), Math.abs(transaction.amount))) * 100}%` }}
+                      />
+                      <div 
+                        className="absolute right-0 top-0 h-full bg-red-500 dark:bg-red-400"
+                        style={{ width: `${(Math.abs(transaction.amount) / Math.max(Math.abs(transaction.amount), Math.abs(transaction.amount))) * 100}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Financial Health Score */}
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-6 transition-colors duration-200">
+              <div className="flex items-start justify-between">
+                <div>
+                  <h2 className="text-lg font-medium text-blue-900 dark:text-blue-100">Financial Health Insights</h2>
+                  <div className="mt-4 space-y-3">
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-green-500 dark:bg-green-400 rounded-full mr-3"></div>
+                      <span className="text-sm text-blue-800 dark:text-blue-200">
+                        You're saving 25% of your income on average
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-yellow-500 dark:bg-yellow-400 rounded-full mr-3"></div>
+                      <span className="text-sm text-blue-800 dark:text-blue-200">
+                        Food & Dining is your largest expense category
+                      </span>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full mr-3"></div>
+                      <span className="text-sm text-blue-800 dark:text-blue-200">
+                        Your spending has increased 15% compared to last period
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div className="text-3xl font-bold text-blue-900 dark:text-blue-100">8.5</div>
+                  <div className="text-sm text-blue-700 dark:text-blue-300">Health Score</div>
+                  <div className="text-xs text-blue-600 dark:text-blue-400 mt-1">Out of 10</div>
+                </div>
               </div>
             </div>
           </>
