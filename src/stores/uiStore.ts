@@ -38,16 +38,12 @@ const applyTheme = (theme: 'light' | 'dark') => {
   
   const root = window.document.documentElement;
   
-  console.log('Applying theme:', theme);
-  console.log('Root element before:', root.classList.toString());
-  
   if (theme === 'dark') {
     root.classList.add('dark');
   } else {
     root.classList.remove('dark');
   }
-  
-  console.log('Root element after:', root.classList.toString());
+
   localStorage.setItem('theme', theme);
 };
 

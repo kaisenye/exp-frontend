@@ -1,11 +1,15 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import DashboardLayout from '../../components/layout/Layout';
+import DisconnectAccountModal from '../../components/accounts/DisconnectAccountModal';
 import { accountService } from '../../services/accounts';
 import { plaidService } from '../../services/plaidService';
+import type { Account } from '../../types';
 
 export default function AccountsPage() {
   const [isConnecting, setIsConnecting] = useState(false);
+  const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const queryClient = useQueryClient();
 
   // Fetch accounts
@@ -28,6 +32,19 @@ export default function AccountsPage() {
     },
   });
 
+  // Sync individual account mutation
+  const syncAccountMutation = useMutation({
+    mutationFn: (accountId: number) => plaidService.syncAccount(accountId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      queryClient.invalidateQueries({ queryKey: ['transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+    },
+    onError: (error) => {
+      alert(`Failed to sync account: ${error.message}`);
+    },
+  });
+
   // Sync accounts mutation
   const syncAccountsMutation = useMutation({
     mutationFn: () => plaidService.syncAccounts(),
@@ -40,14 +57,37 @@ export default function AccountsPage() {
 
   // Disconnect account mutation
   const disconnectAccountMutation = useMutation({
-    mutationFn: (accountId: number) => plaidService.disconnectAccount(accountId),
-    onSuccess: () => {
+    mutationFn: ({ accountId, options }: { 
+      accountId: number; 
+      options: {
+        removeTransactions: boolean;
+        removeAccount: boolean;
+        keepCategories: boolean;
+      }
+    }) => plaidService.disconnectAccount(accountId, options),
+    onSuccess: (data) => {
+      const { cleanup_summary } = data;
+      
+      // Show success message with cleanup summary
+      const summaryParts = [
+        cleanup_summary.transactions_removed > 0 && `${cleanup_summary.transactions_removed} transactions removed`,
+        cleanup_summary.account_deactivated && 'Account deactivated'
+      ].filter(Boolean);
+      
+      const summaryMessage = summaryParts.length > 0 
+        ? `Account disconnected. ${summaryParts.join(', ')}.`
+        : 'Account disconnected successfully.';
+      
+      alert(summaryMessage);
+      
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
       queryClient.invalidateQueries({ queryKey: ['transactions'] });
       queryClient.invalidateQueries({ queryKey: ['dashboard-stats'] });
+      setDisconnectModalOpen(false);
+      setSelectedAccount(null);
     },
     onError: (error) => {
-      alert('Account disconnection is not yet implemented in the backend.');
+      alert(`Failed to disconnect account: ${error.message}`);
     },
   });
 
@@ -73,10 +113,34 @@ export default function AccountsPage() {
     syncAccountsMutation.mutate();
   };
 
+  const handleSyncAccount = (accountId: number, accountName: string) => {
+    syncAccountMutation.mutate(accountId);
+  };
+
   const handleDisconnectAccount = (accountId: number, accountName: string) => {
-    if (confirm(`Are you sure you want to disconnect ${accountName}? This will remove all associated transactions.`)) {
-      disconnectAccountMutation.mutate(accountId);
+    const account = accountsData?.accounts.find(acc => acc.id === accountId);
+    if (account) {
+      setSelectedAccount(account);
+      setDisconnectModalOpen(true);
     }
+  };
+
+  const handleDisconnectConfirm = (options: {
+    removeTransactions: boolean;
+    removeAccount: boolean;
+    keepCategories: boolean;
+  }) => {
+    if (selectedAccount) {
+      disconnectAccountMutation.mutate({
+        accountId: selectedAccount.id,
+        options,
+      });
+    }
+  };
+
+  const handleDisconnectCancel = () => {
+    setDisconnectModalOpen(false);
+    setSelectedAccount(null);
   };
 
   const formatCurrency = (amount: number) => {
@@ -190,7 +254,7 @@ export default function AccountsPage() {
               <button 
                 onClick={handleSyncAccounts}
                 disabled={syncAccountsMutation.isPending || !accountsData?.accounts.length}
-                className="px-4 py-2 text-gray-700 dark:text-neutral-300 border border-gray-300 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 text-gray-700 cursor-pointer dark:text-neutral-300 border border-gray-300 dark:border-neutral-600 rounded-lg hover:bg-gray-50 dark:hover:bg-neutral-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <span className="flex items-center">
                   <svg className={`w-4 h-4 mr-2 ${syncAccountsMutation.isPending ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -202,7 +266,7 @@ export default function AccountsPage() {
               <button 
                 onClick={handleConnectAccount}
                 disabled={isConnecting || createLinkTokenMutation.isPending}
-                className="px-4 py-2 bg-blue-600 dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                className="px-4 py-2 bg-blue-600 cursor-pointer dark:bg-blue-500 text-white rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 <span className="flex items-center">
                   <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -274,23 +338,12 @@ export default function AccountsPage() {
                           <p className="text-sm text-gray-500 dark:text-neutral-400">{account.institution_name}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAccountTypeColor(account.account_type)}`}>
-                          {account.account_type}
-                        </span>
-                        <button
-                          onClick={() => handleDisconnectAccount(account.id, account.name)}
-                          className="p-1 text-gray-400 dark:text-neutral-500 hover:text-red-600 dark:hover:text-red-400"
-                          title="Disconnect account"
-                        >
-                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                          </svg>
-                        </button>
-                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getAccountTypeColor(account.account_type)}`}>
+                        {account.account_type}
+                      </span>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-2 mb-4">
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-gray-600 dark:text-neutral-400">Current Balance</span>
                         <span className={`text-lg font-semibold ${account.balance_current >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
@@ -311,6 +364,29 @@ export default function AccountsPage() {
                         <span>Account: {account.display_name}</span>
                         <span>Last updated: {new Date(account.updated_at).toLocaleDateString()}</span>
                       </div>
+                    </div>
+
+                    {/* Account Actions */}
+                    <div className="flex gap-2 pt-3 border-t border-gray-200 dark:border-neutral-600">
+                      <button
+                        onClick={() => handleSyncAccount(account.id, account.name)}
+                        disabled={syncAccountMutation.isPending}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      >
+                        <svg className={`w-4 h-4 ${syncAccountMutation.isPending ? 'animate-spin' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        {syncAccountMutation.isPending ? 'Syncing...' : 'Sync'}
+                      </button>
+                      <button
+                        onClick={() => handleDisconnectAccount(account.id, account.name)}
+                        className="flex-1 flex items-center justify-center gap-2 px-3 py-2 text-sm text-red-600 dark:text-red-400 border border-red-200 dark:border-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L18.364 5.636M5.636 18.364l12.728-12.728" />
+                        </svg>
+                        Disconnect
+                      </button>
                     </div>
                   </div>
                 ))}
@@ -390,6 +466,15 @@ export default function AccountsPage() {
             </ul>
           </div>
         </div>
+
+        {/* Disconnect Modal */}
+        <DisconnectAccountModal
+          isOpen={disconnectModalOpen}
+          onClose={handleDisconnectCancel}
+          onConfirm={handleDisconnectConfirm}
+          account={selectedAccount}
+          isLoading={disconnectAccountMutation.isPending}
+        />
       </div>
     </DashboardLayout>
   );

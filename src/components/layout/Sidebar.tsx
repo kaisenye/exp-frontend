@@ -135,8 +135,8 @@ export default function Sidebar({ className }: SidebarProps) {
         {/* Footer */}
         <div className="p-4 border-t border-gray-100 dark:border-neutral-700">
           <div className="text-xs text-gray-500 dark:text-neutral-400 text-center">
-            <p className="font-medium">ExpenseTracker</p>
-            <p className="mt-1">v1.0.0</p>
+            <p className="font-medium">© 2025 Romo.</p>
+            <p className="mt-1">All Rights Reserved.</p>
           </div>
         </div>
       </div>
@@ -155,7 +155,7 @@ export default function Sidebar({ className }: SidebarProps) {
                 <span className="text-white font-bold text-sm">ET</span>
               </div>
               <span className="ml-3 text-lg font-semibold text-gray-900 dark:text-neutral-100">
-                ExpenseTracker
+                romo.
               </span>
             </div>
             <button
@@ -197,8 +197,8 @@ export default function Sidebar({ className }: SidebarProps) {
           {/* Footer */}
           <div className="p-4 border-t border-gray-200 dark:border-neutral-700">
             <div className="text-xs text-gray-500 dark:text-neutral-400">
-              <p>ExpenseTracker v1.0.0</p>
-              <p>Connected with Plaid</p>
+              <p>© 2025 Romo.</p>
+              <p>All Rights Reserved.</p>
             </div>
           </div>
         </div>

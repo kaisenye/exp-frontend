@@ -53,14 +53,59 @@ export class PlaidService {
 
   /**
    * Remove Plaid connection for an account
-   * Note: This endpoint doesn't exist in the backend yet
    */
-  async disconnectAccount(accountId: number): Promise<void> {
+  async disconnectAccount(
+    accountId: number, 
+    options: {
+      removeTransactions?: boolean;
+      removeAccount?: boolean;
+      keepCategories?: boolean;
+    } = {}
+  ): Promise<{
+    message: string;
+    account: {
+      id: number;
+      name: string;
+      status: string;
+    };
+    cleanup_summary: {
+      transactions_removed: number;
+      classifications_removed: number;
+      account_deactivated: boolean;
+      plaid_ids_cleared: boolean;
+    };
+  }> {
     try {
-      // This route doesn't exist in the backend - you may need to implement it
-      // or handle account disconnection differently
-      throw new Error('Disconnect functionality not yet implemented in backend');
-      // await apiClient.delete(`/plaid/accounts/${accountId}`);
+      const params = new URLSearchParams();
+      if (options.removeTransactions !== undefined) {
+        params.append('remove_transactions', options.removeTransactions.toString());
+      }
+      if (options.removeAccount !== undefined) {
+        params.append('remove_account', options.removeAccount.toString());
+      }
+      if (options.keepCategories !== undefined) {
+        params.append('keep_categories', options.keepCategories.toString());
+      }
+
+      const queryString = params.toString();
+      const url = `/plaid/disconnect/${accountId}${queryString ? `?${queryString}` : ''}`;
+      
+      const response = await apiClient.delete<{
+        message: string;
+        account: {
+          id: number;
+          name: string;
+          status: string;
+        };
+        cleanup_summary: {
+          transactions_removed: number;
+          classifications_removed: number;
+          account_deactivated: boolean;
+          plaid_ids_cleared: boolean;
+        };
+      }>(url);
+      
+      return response;
     } catch (error: any) {
       throw new Error(error.message || 'Failed to disconnect account');
     }

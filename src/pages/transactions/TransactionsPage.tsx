@@ -277,38 +277,103 @@ export default function TransactionsPage() {
               )}
             </div>
           ) : (
-            <div className="divide-y divide-gray-200 dark:divide-neutral-700">
-              {transactionsData.transactions.map((transaction) => (
-                <div key={transaction.id} className="p-6 hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className="text-2xl">
+            <div className="overflow-x-auto">
+              {/* Table Header */}
+              <div className="border-b border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-700/50">
+                <div className="grid grid-cols-12 gap-4 px-6 py-4 text-left text-xs font-medium text-gray-500 dark:text-neutral-400 uppercase tracking-wider">
+                  <div className="col-span-1 flex items-center justify-center">Type</div>
+                  <div className="col-span-3">Merchant</div>
+                  <div className="col-span-2">Category</div>
+                  <div className="col-span-2">Account</div>
+                  <div className="col-span-2">Date</div>
+                  <div className="col-span-2 text-right">Amount</div>
+                </div>
+              </div>
+
+              {/* Table Body */}
+              <div className="divide-y divide-gray-200 dark:divide-neutral-700">
+                {transactionsData.transactions.map((transaction) => (
+                  <div key={transaction.id} className="grid grid-cols-12 gap-4 px-6 py-4 hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors items-center">
+                    {/* Type Icon */}
+                    <div className="col-span-1 flex items-center justify-center">
+                      <div className="text-xl">
                         {getTransactionIcon(transaction.primary_category?.name || '')}
                       </div>
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3">
-                          <div className="font-medium text-gray-900 dark:text-neutral-100">
-                            {transaction.merchant_name}
-                          </div>
-                          <span className="text-sm text-gray-600 dark:text-neutral-400 bg-gray-100 dark:bg-neutral-700 px-2 py-1 rounded-full">
-                            {transaction.primary_category?.name}
-                          </span>
-                        </div>
-                        <div className="text-sm text-gray-600 dark:text-neutral-400 mt-1">
-                          {transaction.account.display_name} • {new Date(transaction.date).toLocaleDateString()}
-                        </div>
+                    </div>
+
+                    {/* Merchant */}
+                    <div className="col-span-3">
+                      <div className="font-medium text-gray-900 dark:text-neutral-100 truncate">
+                        {transaction.merchant_name || 'Unknown Merchant'}
+                      </div>
+                      <div className="text-sm text-gray-500 dark:text-neutral-400 truncate">
+                        {(transaction.merchant_name && transaction.merchant_name.length > 30) ? transaction.merchant_name : ''}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className={`font-semibold ${
+
+                    {/* Category */}
+                    <div className="col-span-2">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 dark:bg-neutral-700 text-gray-800 dark:text-neutral-200">
+                        {transaction.primary_category?.name || 'Uncategorized'}
+                      </span>
+                    </div>
+
+                    {/* Account */}
+                    <div className="col-span-2">
+                      <div className="text-sm font-medium text-gray-900 dark:text-neutral-100 truncate">
+                        {transaction.account.display_name}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-neutral-400">
+                        {transaction.account.account_type || 'Account'}
+                      </div>
+                    </div>
+
+                    {/* Date */}
+                    <div className="col-span-2">
+                      <div className="text-sm text-gray-900 dark:text-neutral-100">
+                        {new Date(transaction.date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric'
+                        })}
+                      </div>
+                      <div className="text-xs text-gray-500 dark:text-neutral-400">
+                        {new Date(transaction.date).toLocaleDateString('en-US', {
+                          weekday: 'short'
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="col-span-2 text-right">
+                      <div className={`font-semibold text-sm ${
                         transaction.is_expense ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'
                       }`}>
                         {transaction.is_expense ? '-' : '+'}{formatCurrency(Math.abs(transaction.amount))}
                       </div>
+                      <div className="text-xs text-gray-500 dark:text-neutral-400">
+                        {transaction.is_expense ? 'Expense' : 'Income'}
+                      </div>
                     </div>
                   </div>
+                ))}
+              </div>
+
+              {/* Pagination Info */}
+              {transactionsData?.pagination && (
+                <div className="border-t border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-700/50 px-6 py-3">
+                  <div className="flex items-center justify-between text-sm text-gray-700 dark:text-neutral-300">
+                    <div>
+                      Showing {transactionsData.transactions.length} of {transactionsData.pagination.total_count} transactions
+                    </div>
+                    {transactionsData.pagination.total_pages > transactionsData.pagination.current_page && (
+                      <button className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 font-medium">
+                        Load More
+                      </button>
+                    )}
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>

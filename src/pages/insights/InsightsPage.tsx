@@ -212,10 +212,10 @@ export default function InsightsPage() {
                 </option>
               ))}
             </select>
-            <button className="flex items-center px-4 py-2 text-gray-700 dark:text-neutral-300 bg-gray-100 dark:bg-neutral-700 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-600 transition-colors">
+            {/* <button className="flex items-center px-4 py-2 text-gray-700 dark:text-neutral-300 bg-gray-100 dark:bg-neutral-700 rounded-lg hover:bg-gray-200 dark:hover:bg-neutral-600 transition-colors">
               <ArrowPathIcon className="w-4 h-4 mr-2" />
               Refresh
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -239,7 +239,7 @@ export default function InsightsPage() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600 dark:text-neutral-400">Savings Rate</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-neutral-100">{insights.savingsRate.toFixed(1)}%</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-neutral-100">{insights.savingsRate.toFixed(1)}%</p>
                     <p className={`text-xs ${insights.savingsRate >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
                       {insights.savingsRate >= 20 ? 'Excellent!' : insights.savingsRate >= 10 ? 'Good progress' : insights.savingsRate >= 0 ? 'On track' : 'Needs attention'}
                     </p>
@@ -275,9 +275,9 @@ export default function InsightsPage() {
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600 dark:text-neutral-400">Avg Daily Spend</p>
-                    <p className="text-2xl font-bold text-gray-900 dark:text-neutral-100">{formatCurrency(insights.avgDailySpend)}</p>
+                    <p className="text-xl font-bold text-gray-900 dark:text-neutral-100">{formatCurrency(insights.avgDailySpend)}</p>
                     <p className={`text-xs ${insights.monthlyComparison >= 0 ? 'text-red-600 dark:text-red-400' : 'text-green-600 dark:text-green-400'}`}>
-                      {formatPercentage(insights.monthlyComparison)} vs last period
+                      {formatPercentage(insights.monthlyComparison)}
                     </p>
                   </div>
                 </div>
@@ -286,7 +286,7 @@ export default function InsightsPage() {
               <div className="bg-white dark:bg-neutral-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 transition-colors duration-200">
                 <div className="flex items-center">
                   <div className="p-2 bg-yellow-100 dark:bg-yellow-900/30 rounded-lg">
-                    <span className="text-2xl">{getBudgetStatusIcon(insights.budgetStatus)}</span>
+                    <span className="text-xl">{getBudgetStatusIcon(insights.budgetStatus)}</span>
                   </div>
                   <div className="ml-4">
                     <p className="text-sm font-medium text-gray-600 dark:text-neutral-400">Budget Status</p>
@@ -342,7 +342,7 @@ export default function InsightsPage() {
                   <div className="flex justify-between items-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                     <div>
                       <p className="text-sm font-medium text-green-800 dark:text-green-400">Total Income</p>
-                      <p className="text-2xl font-bold text-green-900 dark:text-green-300">{formatCurrency(insights.totalIncome)}</p>
+                      <p className="text-xl font-bold text-green-900 dark:text-green-300">{formatCurrency(insights.totalIncome)}</p>
                     </div>
                     <div className="p-2 bg-green-100 dark:bg-green-900/30 rounded-lg">
                       <svg className="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -354,7 +354,7 @@ export default function InsightsPage() {
                   <div className="flex justify-between items-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
                     <div>
                       <p className="text-sm font-medium text-red-800 dark:text-red-400">Total Expenses</p>
-                      <p className="text-2xl font-bold text-red-900 dark:text-red-300">{formatCurrency(insights.totalSpent)}</p>
+                      <p className="text-xl font-bold text-red-900 dark:text-red-300">{formatCurrency(insights.totalSpent)}</p>
                     </div>
                     <div className="p-2 bg-red-100 dark:bg-red-900/30 rounded-lg">
                       <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -366,7 +366,7 @@ export default function InsightsPage() {
                   <div className="flex justify-between items-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
                     <div>
                       <p className="text-sm font-medium text-blue-800 dark:text-blue-400">Net Amount</p>
-                      <p className={`text-2xl font-bold ${insights.totalIncome - insights.totalSpent >= 0 ? 'text-blue-900 dark:text-blue-300' : 'text-red-900 dark:text-red-300'}`}>
+                      <p className={`text-xl font-bold ${insights.totalIncome - insights.totalSpent >= 0 ? 'text-blue-900 dark:text-blue-300' : 'text-red-900 dark:text-red-300'}`}>
                         {formatCurrency(insights.totalIncome - insights.totalSpent)}
                       </p>
                     </div>
@@ -490,59 +490,6 @@ export default function InsightsPage() {
                           }}
                         />
                       </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Monthly Breakdown */}
-            <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm border border-gray-200 dark:border-neutral-700 p-6 transition-colors duration-200">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-medium text-gray-900 dark:text-neutral-100">Monthly Trends</h2>
-                  <p className="text-sm text-gray-600 dark:text-neutral-400">Income vs expenses over time</p>
-                </div>
-                <CalendarIcon className="w-6 h-6 text-gray-400 dark:text-neutral-500" />
-              </div>
-
-              <div className="space-y-4">
-                {transactionsData?.transactions.map((transaction) => (
-                  <div key={transaction.id} className="border border-gray-200 dark:border-neutral-600 rounded-lg p-4 hover:bg-gray-50 dark:hover:bg-neutral-700/50 transition-colors">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-medium text-gray-900 dark:text-neutral-100">{transaction.primary_category?.name || 'Uncategorized'} 2024</h3>
-                      <div className={`text-sm font-medium ${
-                        transaction.amount > 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        {transaction.amount > 0 ? '+' : ''} {formatCurrency(Math.abs(transaction.amount))}
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-neutral-400">Income</span>
-                        <span className="font-medium text-green-600 dark:text-green-400">
-                          {transaction.amount > 0 ? '+' : ''} {formatCurrency(transaction.amount)}
-                        </span>
-                      </div>
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-600 dark:text-neutral-400">Expenses</span>
-                        <span className="font-medium text-red-600 dark:text-red-400">
-                          {transaction.amount < 0 ? '+' : ''} {formatCurrency(Math.abs(transaction.amount))}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Visual bar representation */}
-                    <div className="mt-3 relative h-2 bg-gray-200 dark:bg-neutral-600 rounded-full overflow-hidden">
-                      <div 
-                        className="absolute left-0 top-0 h-full bg-green-500 dark:bg-green-400"
-                        style={{ width: `${(Math.abs(transaction.amount) / Math.max(Math.abs(transaction.amount), Math.abs(transaction.amount))) * 100}%` }}
-                      />
-                      <div 
-                        className="absolute right-0 top-0 h-full bg-red-500 dark:bg-red-400"
-                        style={{ width: `${(Math.abs(transaction.amount) / Math.max(Math.abs(transaction.amount), Math.abs(transaction.amount))) * 100}%` }}
-                      />
                     </div>
                   </div>
                 ))}

@@ -1,6 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
 import AccountCard from './AccountCard';
 import PlaidLinkButton from '../plaid/PlaidLinkButton';
+import DisconnectAccountModal from './DisconnectAccountModal';
 import { Button } from '../ui/Button';
 import { accountService } from '../../services/accounts';
 import { plaidService } from '../../services/plaidService';
@@ -14,6 +16,8 @@ interface AccountsListProps {
 export default function AccountsList({ className }: AccountsListProps) {
   const { addNotification } = useUIStore();
   const queryClient = useQueryClient();
+  const [disconnectModalOpen, setDisconnectModalOpen] = useState(false);
+  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
 
   // Fetch accounts
   const {
@@ -69,14 +73,42 @@ export default function AccountsList({ className }: AccountsListProps) {
 
   // Disconnect account mutation
   const disconnectAccountMutation = useMutation({
-    mutationFn: (accountId: number) => plaidService.disconnectAccount(accountId),
-    onSuccess: () => {
+    mutationFn: ({ accountId, options }: { 
+      accountId: number; 
+      options: {
+        removeTransactions: boolean;
+        removeAccount: boolean;
+        keepCategories: boolean;
+      }
+    }) => plaidService.disconnectAccount(accountId, options),
+    onSuccess: (data) => {
+      const { cleanup_summary } = data;
+      
       addNotification({
         type: 'success',
         title: 'Account Disconnected',
-        message: 'Account has been disconnected.',
+        message: `${data.account.name} has been disconnected successfully.`,
       });
+
+      // Show detailed summary if significant actions were taken
+      if (cleanup_summary.transactions_removed > 0 || cleanup_summary.account_deactivated) {
+        const summaryMessage = [
+          cleanup_summary.transactions_removed > 0 && `Removed ${cleanup_summary.transactions_removed} transactions`,
+          cleanup_summary.classifications_removed > 0 && `Cleared ${cleanup_summary.classifications_removed} category assignments`,
+          cleanup_summary.account_deactivated && 'Account deactivated',
+          cleanup_summary.plaid_ids_cleared && 'Plaid connection removed'
+        ].filter(Boolean).join(', ');
+
+        addNotification({
+          type: 'info',
+          title: 'Cleanup Summary',
+          message: summaryMessage,
+        });
+      }
+
       queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      setDisconnectModalOpen(false);
+      setSelectedAccount(null);
     },
     onError: (error: any) => {
       addNotification({
@@ -92,9 +124,29 @@ export default function AccountsList({ className }: AccountsListProps) {
   };
 
   const handleDisconnectAccount = (accountId: number) => {
-    if (window.confirm('Are you sure you want to disconnect this account?')) {
-      disconnectAccountMutation.mutate(accountId);
+    const account = accountsData?.accounts.find(acc => acc.id === accountId);
+    if (account) {
+      setSelectedAccount(account);
+      setDisconnectModalOpen(true);
     }
+  };
+
+  const handleDisconnectConfirm = (options: {
+    removeTransactions: boolean;
+    removeAccount: boolean;
+    keepCategories: boolean;
+  }) => {
+    if (selectedAccount) {
+      disconnectAccountMutation.mutate({
+        accountId: selectedAccount.id,
+        options,
+      });
+    }
+  };
+
+  const handleDisconnectCancel = () => {
+    setDisconnectModalOpen(false);
+    setSelectedAccount(null);
   };
 
   const handleSyncAll = () => {
@@ -293,6 +345,15 @@ export default function AccountsList({ className }: AccountsListProps) {
           />
         ))}
       </div>
+
+      {/* Disconnect Modal */}
+      <DisconnectAccountModal
+        isOpen={disconnectModalOpen}
+        onClose={handleDisconnectCancel}
+        onConfirm={handleDisconnectConfirm}
+        account={selectedAccount}
+        isLoading={disconnectAccountMutation.isPending}
+      />
     </div>
   );
 } 
